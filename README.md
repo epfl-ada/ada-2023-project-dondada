@@ -1,7 +1,7 @@
 # IPocalypse now: how IPAs invaded our pints
 
 ## Abstract: 
-We can trace back first occurences of the word IPA as far back as the $`19^{th}`$ century. However it seems that it is only in the past decades that IPAs became popular, at the point that now, one cannot sit in a bar without seeing this word on every beer tap. But how did this happen ? In this project, we will try to identify how the IPA trend spread throughout the world both from a geographical and social point of view. To do so we will analyse millions of review from two beer rating websites [BeerAdvocate](https://www.beeradvocate.com/) and [RateBeer](https://www.ratebeer.com/). Ultimately, we would like to understand what are the key factors necessary for a beer style to spread at a global scale, identify what beer type will replace the IPA in the heart of beer lovers and from where it will emerge.
+We can trace back first occurences of the word IPA as far back as the $`19^{th}`$ century. However it seems that it is only in the past decades that IPAs became popular, at the point that now, one cannot sit in a bar without seeing this word on every beer tap. But how did this happen ? In this project, we will try to identify how the IPA trend spread throughout the world both from a geographical and social point of view. To do so we will analyse millions of reviews from two beer rating websites [BeerAdvocate](https://www.beeradvocate.com/) and [RateBeer](https://www.ratebeer.com/). Ultimately, we would like to understand what are the key factors necessary for a beer style to spread at a global scale, identify what beer type will replace the IPA in the heart of beer lovers and from where it will emerge.
 
 ## Research Questions:
 **Important: dans toute ces question est ce qu'on va pouvoir caler des anovas, t-test et autres joyeusetés ? Peut-etre en comparant notes IPA vs notes autres bières**
@@ -26,22 +26,31 @@ For the same reasons and because we may have a closer look at what is happening 
 Population Estimates and Decennial Census dataset](https://www.statsamerica.org/downloads/default.aspx). In this dataset we can find the population (count or estimate) from each states, for every decade from 1970 to 2000 and for every year since 2000. We will use the population count released by the state (if not available, we will use the estimate).
 
 ## Methods:
-**Décrire ce qu'on va faire en code pour répondre aux questions**
-### Metrics we will use to define a beer type popularity:
-- The number of ratings for that type (even though this does not show if a beer is appreciated, it allows to see if it's drinked a lot)
+### Data Pre-Process
+Convert text files (ratings.txt and reviews.txt) to csv.
+
+Filter the dataset by removing rows with relevant values missing.
+**Svp ajoutez les preprocess que vous avez fait**
+
+### Exploratory analysis
+Make a few plots allowing to present the dataset (e.g. different beer types available on the website, repartition of nb of ratings per country, distribution of beer type in the top100)
+
+Analyse the language of comments with a naïve Bayesian classifier to see if it is reasonable to only keep comments in english. We will use [CLD2](https://github.com/CLD2Owners/cld2) for this purpose.
+
+### Geographical and social analysis
+Compute metrics used to determine a beer type popularity:
+
+- The number of ratings for that type
 - The average grade and the average bros_score (the bros_score being a the score given by an expert)
 - The number of fans of this type of beer (We will define a fan as a user who has at least 90\% of his reviews dedicated to the beer of interest $\textcolor{red}{and maybe who always gives a good grade}$
 - Words that are often mentionned in reviews. First we will identify words describing a "good" beer by obtaining the words that are the most represented in positive reviews of beers graded 4.0 or more. Then we will see if these words also appear often for a given type of beer, if we find a match, it may suggest that this beer type is highly appreciated !
 
-### Data Pre-Process
-Convert text files (ratings.txt and reviews.txt) to csv + **Svp ajoutez les preprocess que vous avez fait**
+Then manage vizualization of these metrics (both on world maps and histogramms). Do a word cloud to vizualize data obtained from comments.
 
-### Exploratory analysis
-Make a few plots allowing to present the dataset (e.g. different beer types available on the website, repartition of nb of ratings per country, distribution of beer type in the top100 (camembert)) **Ici thomas tu pourrais mentionner ton algorithm pour les langues**
-
-### Geographical and social analysis
-
+One way independant ANOVA to compare grades of IPAs vs other beers
 ### Predicting the next beer type 
+
+
   
 ## Proposed timeline:
 
@@ -54,8 +63,13 @@ Make a few plots allowing to present the dataset (e.g. different beer types avai
 
 # Organization within the team:
 
-Gaspard: Fini le projet
+| Team member  | Tasks |
+| ------------- | ------------- |
+| Gaspard  | Fini le projet  |
+| Gaspard  | Fini le projet  |
+| Gaspard  | Fini le projet  |
+| Gaspard  | Fini le projet  |
+| Gaspard  | Fini le projet  |
 
 
 # Questions for TAs:
-
