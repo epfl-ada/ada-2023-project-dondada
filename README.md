@@ -6,15 +6,16 @@ We can trace back first occurences of the word IPA as far back as the $`19^{th}`
 ## Research Questions:
 **Important: dans toute ces question est ce qu'on va pouvoir caler des anovas, t-test et autres joyeusetés ? Peut-etre en comparant notes IPA vs notes autres bières**
 
+Is the IPA really the most popular type of beer ?
+  
 Geographical point of view:
-- From where and when did the trend spread ?
-- Is there a particular country at the root of the tree ?
-- Is there region of the world that have not been invaded yet ? 
+- From where and when did the trend spread ? Is there a particular country at the root of the tree ?
+- Is there region of the world that have not been invaded yet ?
+- Is the fanbase of the beer type located where the trend started ? 
 
 Social point of view:
-- Is the IPA really the most popular type of beer ?
 - Can we link the microbreweries & craft beer trend to the IPA trend ?
-- Can a brewery succeed if it has no IPAs in its cave ?
+- Can a brewery succeed if it has no IPAs in its cave ? (t-test)
 - Among a specific beer type, can we identify a specific beer that stands out ?
 
 Can we identify the next hyped beer type and where it will emerge ?
@@ -42,15 +43,16 @@ Compute metrics used to determine a beer type popularity:
 
 - The number of ratings for that type
 - The average grade and the average bros_score (the bros_score being a the score given by an expert)
-- The number of fans of this type of beer (We will define a fan as a user who has at least 90\% of his reviews dedicated to the beer of interest $\textcolor{red}{and maybe who always gives a good grade}$
+- The number of fans of this type of beer (We will define a fan as a user who dedicates most of his reviews to the beer type of interest and who gives a good grade most of the time (we will define the thresholds later))
 - Words that are often mentionned in reviews. First we will identify words describing a "good" beer by obtaining the words that are the most represented in positive reviews of beers graded 4.0 or more. Then we will see if these words also appear often for a given type of beer, if we find a match, it may suggest that this beer type is highly appreciated !
 
 Then manage vizualization of these metrics (both on world maps and histogramms). Do a word cloud to vizualize data obtained from comments.
 
 One way independant ANOVA to compare grades of IPAs vs other beers
+
 ### Predicting the next beer type 
-
-
+Please propose the algorithm we are gonna use and maybe with which features.
+Use PCA to extract features --> Then do a K-means clustering to distinguish between trendy and not trendy beer
   
 ## Proposed timeline:
 
@@ -61,7 +63,7 @@ One way independant ANOVA to compare grades of IPAs vs other beers
 - W13: Make the algorithm predicting the next type of beer
 - W14: Finalize of the datastory on the website.
 
-# Organization within the team:
+## Organization within the team:
 
 | Team member  | Tasks |
 | ------------- | ------------- |
@@ -72,4 +74,4 @@ One way independant ANOVA to compare grades of IPAs vs other beers
 | Gaspard  | Fini le projet  |
 
 
-# Questions for TAs:
+## Questions for TAs:
