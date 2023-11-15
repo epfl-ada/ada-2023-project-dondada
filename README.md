@@ -1,5 +1,7 @@
 # IPocalypse now: how IPAs invaded our pints
 
+![Beer_periodic](https://github.com/epfl-ada/ada-2023-project-dondada/assets/145542268/c3dfb479-c48e-4263-92d3-1df533ccaf0e)
+
 ## Abstract: 
 We can trace back first occurences of the word IPA as far back as the $`19^{th}`$ century. However it seems that it is only in the past decades that IPAs became popular, at the point that now, one cannot sit in a bar without seeing this word on every beer tap. But how did this happen ? In this project, we will try to identify how the IPA trend spread throughout the world both from a geographical and social point of view. To do so we will analyse millions of reviews from two beer rating websites [BeerAdvocate](https://www.beeradvocate.com/) and [RateBeer](https://www.ratebeer.com/). Ultimately, we would like to understand what are the key factors necessary for a beer style to spread at a global scale, identify what beer type will replace the IPA in the heart of beer lovers and from where it will emerge.
 
