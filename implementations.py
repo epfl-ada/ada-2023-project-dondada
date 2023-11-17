@@ -159,7 +159,7 @@ def country_to_continent(country_name):
                 return None
 
 
-def convert_to_date(value):
+def convert_to_date(series):
 
     '''
     Convert Unix timestamps to 'YYYY-MM-DD' format and handle non-timestamp values.
@@ -170,9 +170,9 @@ def convert_to_date(value):
     '''
 
     try:
-        return pd.to_datetime(value, unit='s').strftime('%Y-%m-%d')
+        return pd.to_datetime(value, unit='s').dt.strftime('%Y-%m-%d')
     except (TypeError, ValueError):
-        return value
+        return series
 
 
 def categorize_style(style):
