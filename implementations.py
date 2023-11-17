@@ -170,7 +170,7 @@ def convert_to_date(series):
     '''
 
     try:
-        return pd.to_datetime(value, unit='s').dt.strftime('%Y-%m-%d')
+        return pd.to_datetime(series, unit='s').dt.strftime('%Y-%m-%d')
     except (TypeError, ValueError):
         return series
 
@@ -220,20 +220,6 @@ def categorize_style(style):
     else:
             return 'Other'
 
-'''
-def clean_text(text):
-
-    
-    To remove non UTF-8 characters from a string.
-    The function removes non-printable characters but preserves newline characters \n  
-
-    arg : string 
-
-    returns : UFT-8 format string 
-    
-    cleaned_text = ''.join(c for c in text if unicodedata.category(c) != 'Cc' or c == '\n')
-    return cleaned_text
-'''
 
 
 
