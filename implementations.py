@@ -8,6 +8,7 @@ import csv
 import pycountry as py
 import pycountry_convert as pc 
 import unicodedata
+import matplotlib.pyplot as plt
 
 
 
@@ -167,6 +168,7 @@ def convert_to_date(series):
     arg : Unix timestamps  
 
     returns : formatted date 
+
     '''
 
     try:
@@ -178,6 +180,7 @@ def convert_to_date(series):
 def categorize_style(style):
 
     '''
+
     Merge different beer styles into larger categories. To do so, the function detects specific substrings that correspond to broader beer styles. 
     Also converts the provided string to lowercase beforehand for case-insensitive matching. 
 
@@ -221,6 +224,100 @@ def categorize_style(style):
             return 'Other'
 
 
+def aggregate_data(input_data, group_column):
+
+    '''
+    Creates a new dataframe by aggregating data based on the specified group_column.
+
+    Args:
+    - input_data: DataFrame containing the input data.
+    - group_column: Column based on which the data will be grouped and aggregated.
+
+    Returns:
+    - grouped_data: DataFrame with aggregated data.
+
+    '''
+     
+    # Create an empty dictionary to store aggregated values
+    aggregated_data = {}
+
+    # Iterate over unique values in the specified column
+    for group_value in input_data[group_column].unique():
+        # Filter rows for the current group_value
+        group_data = input_data[input_data[group_column] == group_value]
+        group_data = group_data.sort_values(by='date', ascending=True)
+
+        # Initialize a dictionary for dates
+        aggregated_data[group_value] = {
+            'beer_id': group_data['beer_id'].iloc[0],
+            'beer_name': group_data['beer_name'].iloc[0],
+            'style': group_data['style'].iloc[0],
+            'bigger_style': group_data['bigger_style'].iloc[0],
+            'nbr_ratings': len(group_data),
+            'avg': group_data['avg'].iloc[0],
+            'ratings_info': {}
+        }
+
+        # Iterate over unique dates
+        for date in group_data['date'].unique():
+            date_data = group_data[group_data['date'] == date]
+            aggregated_data[group_value]['ratings_info'][str(date)] = {
+                'nbr_ratings': len(date_data),
+                'avg': date_data['avg'].iloc[0],
+                'locations': {}
+            }
+
+            # Iterate through each location in the current group
+            for location, location_group in date_data.groupby('location'):
+                aggregated_data[group_value]['ratings_info'][str(date)]['locations'][str(location)] = {
+                    'nbr_ratings': len(location_group),
+                    'avg': location_group['avg'].iloc[0]
+                }
+
+    # Convert the dictionary to a DataFrame
+    grouped_data = pd.DataFrame.from_dict(aggregated_data, orient='index')
+
+    # Sort columns in ascending order
+    grouped_data = grouped_data.reset_index().drop(columns='index')
+
+    return grouped_data
 
 
+def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_per_year):
+
+    unique_groups = data[group_column].unique()
+
+    years = [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013,
+            2014, 2015, 2016, 2017]
+
+    # Initialize a DataFrame to store normalized ratings
+    normalized_ratings_df = pd.DataFrame(index=years, columns=unique_groups)
+
+    for group_value in unique_groups:
+        # Extracting the years and corresponding num_ratings for each group_value
+        group_data = data[data[group_column] == group_value]["ratings_info"].iloc[0]
+
+        # Ensure the 'ratings_info' structure is as expected
+        years_data = list(group_data.keys())
+        years_int = [int(year) for year in years_data]
+
+        # Initialize nbr_ratings as a list of zeros
+        nbr_ratings = [0] * len(years)
+
+        # Update nbr_ratings for years where data is available
+        for i, year in enumerate(years):
+            if year in years_int:
+                nbr_ratings[i] = group_data[str(year)]['nbr_ratings'] / total_ratings_per_year.loc[year, 'total_nbr_ratings']
+
+        # Assign the normalized ratings to the DataFrame
+        normalized_ratings_df[group_value] = nbr_ratings
+
+    # Plotting the data as a stacked bar plot using pandas
+    plt.figure(figsize=(12, 8))
+    normalized_ratings_df.plot(kind='bar', stacked=True, colormap='tab10', edgecolor='w')
+    plt.title(title)
+    plt.xlabel('Year')
+    plt.ylabel('Normalized Number of Ratings')
+    plt.legend(title=group_column, loc='upper left', bbox_to_anchor=(1, 1))
+    plt.show()
 
