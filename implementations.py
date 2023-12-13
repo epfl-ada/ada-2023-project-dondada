@@ -224,7 +224,7 @@ def categorize_style(style):
             return 'Other'
 
 
-def aggregate_data(input_data, group_column):
+def aggregate_data(input_data, group_column, user_location):
 
     '''
     Creates a new dataframe by aggregating data based on the specified group_column.
@@ -268,7 +268,7 @@ def aggregate_data(input_data, group_column):
             }
 
             # Iterate through each location in the current group
-            for location, location_group in date_data.groupby('location'):
+            for location, location_group in date_data.groupby(user_location):
                 aggregated_data[group_value]['ratings_info'][str(date)]['locations'][str(location)] = {
                     'nbr_ratings': len(location_group),
                     'avg': location_group['avg'].iloc[0]
@@ -314,7 +314,7 @@ def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_pe
 
     # Plotting the data as a stacked bar plot using pandas
     plt.figure(figsize=(12, 8))
-    normalized_ratings_df.plot(kind='bar', stacked=True, colormap='tab10', edgecolor='w')
+    normalized_ratings_df.plot(kind='bar', stacked=True, colormap='tab20', edgecolor='w')
     plt.title(title)
     plt.xlabel('Year')
     plt.ylabel('Normalized Number of Ratings')
