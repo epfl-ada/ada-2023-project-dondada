@@ -9,6 +9,7 @@ import pycountry as py
 import pycountry_convert as pc 
 import unicodedata
 import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import CountVectorizer
 
 
 
@@ -320,4 +321,39 @@ def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_pe
     plt.ylabel('Normalized Number of Ratings')
     plt.legend(title=group_column, loc='upper left', bbox_to_anchor=(1, 1))
     plt.show()
+
+
+def get_top_words(df, text_column, custom_stop_words=None, n_top_words=10):
+    """
+    Count the occurrences of words in a text column of a DataFrame and return the top N words.
+
+    Parameters:
+    - df: pandas DataFrame
+    - text_column: str, the column containing the text data
+    - custom_stop_words: list, custom stop words to be excluded from word counts
+    - n_top_words: int, the number of top words to retrieve
+
+    Returns:
+    - pd.DataFrame, a DataFrame with the top N words and their counts
+    """
+
+    # Create a CountVectorizer instance with custom stop words
+    vectorizer = CountVectorizer(stop_words=custom_stop_words, lowercase=True)
+
+    # Fit and transform the text data
+    X = vectorizer.fit_transform(df[text_column])
+
+    # Get the feature names (words)
+    feature_names = vectorizer.get_feature_names_out()
+
+    # Sum the occurrences of each word
+    word_counts = X.sum(axis=0)
+
+    # Create a DataFrame with word counts and corresponding words
+    word_counts_df = pd.DataFrame({'word': feature_names, 'count': word_counts.A1})
+
+    # Get the top N words
+    top_words = word_counts_df.nlargest(n_top_words, 'count')
+
+    return top_words
 
