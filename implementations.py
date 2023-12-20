@@ -620,7 +620,7 @@ def ratings_per_US_states(data, us_states, style_column, style, year_column, loc
     
     # Update layout for animation and dropdown menu
     fig.update_layout(
-        title_text=f'US City Number of Ratings for {style} by State ({years[0]}-{years[-1]})',
+        title_text=f'US City Number of Ratings for {style} by State',
         showlegend=True,
         geo=dict(
             scope='usa',
