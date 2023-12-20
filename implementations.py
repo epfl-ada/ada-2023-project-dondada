@@ -3,17 +3,33 @@
 import numpy as np
 import pandas as pd
 import seaborn as sns
-import plotly.express as px
-import os 
-import gzip
-import csv
-import pycountry as py
-import pycountry_convert as pc 
-import unicodedata
 import matplotlib.pyplot as plt
-from sklearn.feature_extraction.text import CountVectorizer
 import matplotlib.colors as colors
+import gzip
+import unicodedata
+import re
+import csv
+import os 
+import io
+#import pycld2 as cld2
+import pycountry as py 
+import pycountry_convert as pc 
+import geopandas as gpd
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.offline as pyo
 
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from scipy.stats import f_oneway
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+from matplotlib.colors import Normalize
+from matplotlib.cm import ScalarMappable
+from shapely.wkt import loads
+from PIL import Image
+from sklearn.feature_extraction.text import CountVectorizer
 
 
 
@@ -288,6 +304,18 @@ def aggregate_data(input_data, group_column, user_location):
 
 
 def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_per_year):
+    """
+    Plot normalized ratings by group using Plotly Express.
+
+    Parameters:
+    - data: pandas DataFrame, the input data
+    - group_column: str, the column containing group information
+    - title: str, the title of the plot
+    - total_ratings_per_year: pandas DataFrame, total ratings per year
+
+    Returns:
+    None
+    """
     unique_groups = data[group_column].unique()
 
     years = [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013,
@@ -299,12 +327,9 @@ def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_pe
     for group_value in unique_groups:
         # Extracting the years and corresponding num_ratings for each group_value
         group_data = data[data[group_column] == group_value]["ratings_info"].iloc[0]
-
-        # Ensure the 'ratings_info' structure is as expected
         years_data = list(group_data.keys())
         years_int = [int(year) for year in years_data]
 
-        # Initialize nbr_ratings as a list of zeros
         nbr_ratings = [0] * len(years)
 
         # Update nbr_ratings for years where data is available
@@ -312,19 +337,21 @@ def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_pe
             if year in years_int:
                 nbr_ratings[i] = group_data[str(year)]['nbr_ratings'] / total_ratings_per_year.loc[year, 'total_nbr_ratings']
 
-        # Assign the normalized ratings to the DataFrame
         normalized_ratings_df[group_value] = nbr_ratings
 
     # Create a long-format DataFrame for Plotly Express
     normalized_ratings_long = normalized_ratings_df.reset_index().melt(id_vars='index', var_name=group_column, value_name='Normalized Ratings')
 
-    # Plotting the data as a stacked bar plot using Plotly Express
+    # Plotting the data as a stacked bar plot using Plotly Express with a qualitative colormap
     fig = px.bar(normalized_ratings_long, x='index', y='Normalized Ratings', color=group_column, barmode='stack',
+                 color_discrete_sequence=px.colors.qualitative.Set3,
                  labels={'index': 'Year', 'Normalized Ratings': 'Normalized Number of Ratings'},
                  title=title)
 
     fig.update_layout(barmode='stack', legend_title_text=group_column, xaxis_title='Year', yaxis_title='Normalized Number of Ratings')
     fig.show()
+
+    return fig
 
 
 def get_top_words(df, text_column, custom_stop_words=None, n_top_words=10):
@@ -376,7 +403,7 @@ def add_iso_code3(location):
         return location
 
 
-def plot_top_styles(grouped_data):
+def plot_increase_ratings(grouped_data):
     # Calculate the sum of ratings for each style
     style_ratings_sum = grouped_data.groupby("bigger_style")["nbr_ratings"].sum()
 
@@ -384,16 +411,13 @@ def plot_top_styles(grouped_data):
     top_styles = style_ratings_sum.nlargest(5).index
     top_styles = sorted(top_styles)
 
-    # Create a stylish line plot for the top 5 styles using seaborn
-    plt.figure(figsize=(12, 8))
-
-    # Set a color palette for better distinction between styles
-    palette = sns.color_palette("husl", n_colors=len(top_styles))
+    # Create an empty figure
+    fig = go.Figure()
 
     mean_increase_list_per_year = []
     mean_increase_y1_yf_list = []
 
-    for style, color in zip(top_styles, palette):
+    for style in top_styles:
         # Extract information for the current style
         style_data = grouped_data[grouped_data["bigger_style"] == style]["ratings_info"].iloc[0]
         years = list(style_data.keys())
@@ -406,24 +430,27 @@ def plot_top_styles(grouped_data):
 
         # Calculate the mean increase per year
         mean_increase_per_year = sum([(nbr_ratings[i] - nbr_ratings[i - 1]) / nbr_ratings[i - 1]
-                             for i in range(1, len(nbr_ratings))]) / (len(nbr_ratings) - 1)
+                                       for i in range(1, len(nbr_ratings))]) / (len(nbr_ratings) - 1)
         mean_increase_list_per_year.append(mean_increase_per_year)
 
-        # Plot the data as a smooth line
-        sns.lineplot(x=years_int, y=nbr_ratings, label=style, color=color, linewidth=2)
+        # Add a trace for the current style
+        fig.add_trace(go.Scatter(x=years_int, y=nbr_ratings, name=style, mode='lines'))
 
-    # Customize plot details
-    plt.title('Number of Ratings per Year for Top 5 Styles', fontsize=16)
-    plt.xlabel('Years', fontsize=14)
-    plt.ylabel('Number of Ratings (log scale)', fontsize=14)
-    plt.yscale('log')
-    plt.legend(title='Style', loc='upper left', fontsize=12)
-    plt.xticks(years_int)
-    plt.grid(True, linestyle='--', alpha=0.7)
-    plt.tight_layout()
-    plt.show()
+    # Update layout details
+    fig.update_layout(
+        title='Number of Ratings per Year for Top 5 Styles',
+        xaxis_title='Years',
+        yaxis_title='Number of Ratings (log scale)',
+        yaxis_type='log',
+        legend_title_text='Style',
+        xaxis=dict(tickmode='array', tickvals=years_int),
+        showlegend=True
+    )
 
-    # Print mean increase for each style
+    fig.update_yaxes(tickvals=[1, 10, 100, 1000, 10000, 100000],
+                 ticktext=['1', '10', '100', '1k', '10k', '100k'])
+
+    # Print mean increase for each style per year
     print(f"Mean Increase for each style per year:")
     for style, increase in zip(top_styles, mean_increase_list_per_year):
         print(f"Mean Increase for {style}: {increase:.2%}")
@@ -434,3 +461,220 @@ def plot_top_styles(grouped_data):
     print(f"\nMean Increase for each style between first year and last year:")
     for style, increase in zip(top_styles, mean_increase_y1_yf_list):
         print(f"Mean Increase for {style}: {increase:.2%}")
+
+    # Show the plot
+    fig.show()
+
+    return fig
+
+def ratings_per_country(data, style, location_column, ratings_info_column, country_rename_function, add_iso_code_function, continent_function):
+    # Only select the data for the specified style
+    style_data = data.query(f'bigger_style == "{style}"')
+
+    # Flatten the nested 'locations' data
+    flattened_locations = []
+
+    for beer_data in style_data[ratings_info_column]:
+        years = list(beer_data.keys())[:-1]
+
+        for year in years:
+            locations_data = beer_data[year]['locations']
+
+            for location, location_info in locations_data.items():
+                nbr_ratings = int(location_info['nbr_ratings'])
+
+                flattened_locations.append({
+                    'year': int(year),
+                    'location': location,
+                    'country': location,
+                    'nbr_ratings': nbr_ratings
+                })
+
+    # Convert the flattened data to a DataFrame
+    df_locations = pd.DataFrame(flattened_locations)
+
+    # Rename the countries that don't have the right format to be converted into ISO 3166 norm
+    df_locations['country'] = df_locations['country'].apply(country_rename_function)
+    df_locations = df_locations.groupby(['year', 'country']).agg({'nbr_ratings': 'sum'}).reset_index()
+    df_locations['log_nbr_ratings'] = np.log1p(df_locations['nbr_ratings'])
+
+    # New column of ISO 3166 norm
+    df_locations['location_with_iso'] = df_locations['country'].apply(add_iso_code_function)
+
+    # New column continent
+    df_locations['continent'] = df_locations['country'].apply(continent_function)
+
+    return df_locations
+
+
+def ratings_per_locations(data, style_column, ratings_info_column, country_rename_function, add_iso_code_function, continent_function, style):
+    # Only select the data for the specified style
+    style_data = data.query(f'{style_column} == "{style}"')
+
+    # Flatten the nested 'locations' data
+    flattened_locations = []
+
+    for beer_data in style_data[ratings_info_column]:
+        years = list(beer_data.keys())
+
+        for year in years:
+            locations_data = beer_data[year]['locations']
+
+            for location, location_info in locations_data.items():
+                nbr_ratings = int(location_info['nbr_ratings'])
+
+                flattened_locations.append({
+                    'year': int(year),
+                    'location': location,
+                    'country': location,
+                    'nbr_ratings': nbr_ratings
+                })
+
+    # Convert the flattened data to a DataFrame
+    df_locations = pd.DataFrame(flattened_locations)
+
+    # Rename the countries that don't have the right format to be converted into ISO 3166 norm
+    df_locations['country'] = df_locations['country'].apply(country_rename_function)
+    df_locations = df_locations.groupby(['year', 'location', 'country']).agg({'nbr_ratings': 'sum'}).reset_index()
+
+    # New column ISO 3166 norm
+    df_locations['location_with_iso'] = df_locations['country'].apply(add_iso_code_function)
+
+    # New column continent
+    df_locations['continent'] = df_locations['country'].apply(continent_function)
+
+    return df_locations
+
+
+def ratings_per_US_states(data, us_states, style_column, style, year_column, location_column, nbr_ratings_column):
+    fig = go.Figure()
+    
+    # Extract states data
+    states_data = data[location_column].str.split(', ', expand=True)
+    df_states = data.copy()
+    df_states['NAME'] = states_data[1]
+    
+    # Merge with US states data
+    merged_states = pd.merge(us_states, df_states, on='NAME')
+    
+    # Animation settings
+    limits = [(0, 99), (100, 399), (400, 999), (1000, 2000), (2001, 6000)]
+    colors = ["black", "orange", "crimson", "forestgreen", "royalblue"]
+    scale = 20
+    
+    # Get unique years
+    years = sorted(merged_states[year_column].unique())[:-1]
+    
+    frames = []
+    
+    # Iterate through each year
+    for year in years:
+        df_year = merged_states[merged_states[year_column] == year]
+        frame_data = []
+        
+        # Iterate through each rating limit
+        for i in range(len(limits)):
+            lim = limits[i]
+            df_sub = merged_states[(merged_states[year_column] == year) & 
+                                   (merged_states[nbr_ratings_column].between(lim[0], lim[1]))]
+            
+            frame_data.append(go.Scattergeo(
+                locationmode='USA-states',
+                lon=df_sub['longitude'],
+                lat=df_sub['latitude'],
+                marker=dict(
+                    size=df_sub[nbr_ratings_column] / scale,
+                    color=colors[i],
+                    line_color='rgb(40,40,40)',
+                    line_width=0.5,
+                    sizemode='area'
+                ),
+                name='{0} - {1}'.format(lim[0], lim[1]),
+                text=df_sub[nbr_ratings_column].astype(str) + ' - ' + df_sub['NAME'],
+            ))
+        
+        frames.append(go.Frame(data=frame_data, name=str(year)))
+    
+    # Create scatter plots for the initial year
+    initial_year = years[0]
+    df_initial_year = merged_states[merged_states[year_column] == initial_year]
+    
+    for i in range(len(limits)):
+        lim = limits[i]
+        df_sub = df_initial_year[df_initial_year[nbr_ratings_column].between(lim[0], lim[1])]
+    
+        fig.add_trace(go.Scattergeo(
+            locationmode='USA-states',
+            lon=df_sub['longitude'],
+            lat=df_sub['latitude'],
+            marker=dict(
+                size=df_sub[nbr_ratings_column] / scale,
+                color=colors[i],
+                line_color='rgb(40,40,40)',
+                line_width=0.5,
+                sizemode='area'
+            ),
+            name='{0} - {1}'.format(lim[0], lim[1]),
+            text=df_sub['NAME'] + ': ' + df_sub[nbr_ratings_column].astype(str),  # Display city name and ratings
+        ))
+    
+    # Update layout for animation and dropdown menu
+    fig.update_layout(
+        title_text=f'US City Number of Ratings for {style} by State ({years[0]}-{years[-1]})',
+        showlegend=True,
+        geo=dict(
+            scope='usa',
+            landcolor='rgb(217, 217, 217)',
+        ),
+        sliders=[{
+            'active': 0,
+            'yanchor': 'top',
+            'xanchor': 'left',
+            'currentvalue': {
+                'font': {'size': 20},
+                'visible': True,
+                'prefix': 'Year:',
+                'suffix': '',
+            },
+            'transition': {'duration': 300, 'easing': 'cubic-in-out'},
+            'len': 0.9,
+            'x': 0.1,
+            'y': 0,
+            'steps': [{
+                'args': [
+                    [str(year)],
+                    {
+                        'frame': {'duration': 500, 'redraw': True},
+                        'mode': 'immediate',
+                        'transition': {'duration': 300}
+                    },
+                ],
+                'label': str(year),
+                'method': 'animate',
+            } for year in years],
+        }],
+        updatemenus=[{
+            'buttons': [{
+                'args': [None, {'frame': {'duration': 500, 'redraw': True}, 'fromcurrent': True}],
+                'label': 'Play',
+                'method': 'animate',
+            }, {
+                'args': [[None], {'frame': {'duration': 0, 'redraw': True}, 'mode': 'immediate', 'transition': {'duration': 0}}],
+                'label': 'Pause',
+                'method': 'animate',
+            }],
+            'direction': 'left',
+            'pad': {'r': 10, 't': 87},
+            'showactive': False,
+            'type': 'buttons',
+            'x': 0.1,
+            'xanchor': 'right',
+            'y': 0,
+            'yanchor': 'top',
+        }],
+    )
+    
+    # Add frames to the figure
+    fig.frames = frames
+    
+    return fig
