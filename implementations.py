@@ -678,3 +678,44 @@ def ratings_per_US_states(data, us_states, style_column, style, year_column, loc
     fig.frames = frames
     
     return fig
+
+
+def review_keyword_percentage(df, key_words):
+    """
+    Calculate the percentage of reviews containing key words for each year.
+
+    Parameters:
+    - df: DataFrame containing 'text' and 'date' columns.
+    - key_words: List of key words to search for in the reviews.
+
+    Returns:
+    - result_df: DataFrame with yearly counts and percentages.
+    """
+    # Convert the 'date' column to datetime format
+
+    # Initialize a dictionary to store counts for each year
+    yearly_counts = {}
+
+    # Iterate through each year
+    for year in df['date'].unique():
+        # Filter the DataFrame for the current year
+        year_df = df[df['date'] == year]
+
+        # Count the number of reviews containing key words
+        total_reviews = len(year_df)
+        reviews_with_keywords = year_df['text'].str.contains('|'.join(key_words), case=False).sum()
+
+        # Calculate the percentage
+        percentage_with_keywords = (reviews_with_keywords / total_reviews) * 100 if total_reviews > 0 else 0
+
+        # Store the result in the dictionary
+        yearly_counts[year] = {
+            'total_reviews': total_reviews,
+            'reviews_with_keywords': reviews_with_keywords,
+            'percentage_with_keywords': percentage_with_keywords
+        }
+
+    # Create a new DataFrame from the dictionary
+    result_df = pd.DataFrame.from_dict(yearly_counts, orient='index')
+
+    return result_df
