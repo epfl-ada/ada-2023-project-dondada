@@ -421,7 +421,8 @@ def plot_increase_ratings(grouped_data):
 
     mean_increase_list_per_year = []
     mean_increase_y1_yf_list = []
-
+    mean_increase_dfs = []
+    
     for style in top_styles:
         # Extract information for the current style
         style_data = grouped_data[grouped_data["bigger_style"] == style]["ratings_info"].iloc[0]
@@ -437,7 +438,16 @@ def plot_increase_ratings(grouped_data):
         mean_increase_per_year = sum([(nbr_ratings[i] - nbr_ratings[i - 1]) / nbr_ratings[i - 1]
                                        for i in range(1, len(nbr_ratings))]) / (len(nbr_ratings) - 1)
         mean_increase_list_per_year.append(mean_increase_per_year)
+        
+        # Create a DataFrame with the new columns for the current style
+        mean_increase_df = pd.DataFrame({
+            'bigger_style': [style],
+            'mean_increase_list_per_year': [mean_increase_per_year],
+            'mean_increase_y1_yf': [mean_increase_y1_yf],
+        })
 
+        # Append the DataFrame to the list
+        mean_increase_dfs.append(mean_increase_df)
         # Add a trace for the current style
         fig.add_trace(go.Scatter(x=years_int, y=nbr_ratings, name=style, mode='lines'))
 
