@@ -1,5 +1,7 @@
 # Brewmageddon: How IPAs Took Over the Beeriverse
 
+## Check out our [Brewmageddon Datastory](https://tcastal.github.io/dondada/) !
+
 ## Abstract: 
 We can trace back first occurrences of the word IPA as far back as the $`19^{th}`$ century. However it seems that it is only in the past decades that IPAs became popular, at the point that now, one cannot sit in a bar without seeing this word on every beer tap. But how did this happen ? In this project, we will try to identify how the IPA trend spread throughout the world both from a geographical and social point of view. To do so we will analyse millions of reviews from two beer rating websites [BeerAdvocate](https://www.beeradvocate.com/) and [RateBeer](https://www.ratebeer.com/). Ultimately, we would like to understand what are the key factors necessary for a beer style to spread at a global scale and identify what beer type will replace the IPA in the heart of beer lovers and from where it will emerge.
 
@@ -30,18 +32,21 @@ Convert text files (ratings.txt and reviews.txt) to csv.
 We didn’t keep the matched beer data files since it eliminated too much information. We created bigger styles of beer according to the [BeerAdvocate style classification](https://www.beeradvocate.com/beer/styles/). As for the locations we grouped them in continents, countries and a US state column in our dataset. For the missing values of the different scores we dropped them. Finally, we eliminated the rows with location that didn’t have the right format.
 
 ### Exploratory analysis
-Study the number of ratings and the different styles of beer represented on both websites (e.g number of ratings per style, distribution of the number of ratings and styles of beers). Have a look at the different scores and their distribution.
-
+Study the number of ratings and the different styles of beer represented on both websites (e.g number of ratings per style, distribution of the number of ratings and styles of beers). 
 Analyse the language of comments with a naïve Bayesian classifier to see if it is reasonable to only keep comments in english. We will use CLD2 for this purpose.
 
-### Metrics to determine a beer type popularity (or review positivity)
+### Defining Beer popularity
 
 - The nbr_ratings for that type
 - The bros_score for that type (a score given by an expert)
 - Beers and reviews that have a score (range 0-100) > to the 3rd quartile
 - Beers and reviews that have an average grade (range 0-5) > to the 3rd quartile
-- The number of fans of this type of beer. We will define a fan as a user who dedicates most of his reviews to the beer type of interest and who gives a good grade most of the time (we will define the thresholds later).
-- Words associated with good reviews. First we will identify words describing a “good” beer by obtaining the words that are the most represented in positive reviews of great beers. Then we will see if these words also appear often for a given type of beer, if we find a match, it may suggest that this beer type is highly appreciated !
+
+  **Microbrewery revolution and IPAs:** For each year, we counted the number of reviews where a word related to microbreweries (such as microbrewery, craft, brewpub, local) appeared. We then compare it with the number of IPA reviews for each year. Finally we measure the correlation between these two curves.
+  
+  **Beer Fanbase:** We identified users that were "fan" of each beer styles. We defined a fan as a user who dedicated at least 75% of his ratings to a given style. Once we identified fans, we compared the number of fan for each beer styles and displayed them on a world map to get geographical insights.
+  
+  **Analysis of review's text:** We extracted words from different kind of reviews like positive reviews (grade > 3rd quartile), negative reviews (grade < 1st quartile), IPA reviews and Stout reviews. Then we plot these words on a [wordcloud](https://amueller.github.io/word_cloud/) and extract the top 10 words appearing in each review category. With this we are able to identify characteristics of good and bad beers, IPAs and Stouts. Comparing IPAs and Stouts with good beer characteristics gives us an idea of the beer popularity.
 
 ### Tests:
 
@@ -61,14 +66,14 @@ In order to reduce the complexity of our dataset, we will perform a PCA to extra
 - W13: Make the algorithm predicting the next trendy beer
 - W14: Finalize of the datastory on the website.
 
-## Organization within the team:
+## Members contribution
 
 | Team member  | Tasks |
 | ------------- | ------------- |
-| Gaspard  | Predicting trend  |
-| Thomas  | Website building and NLP  |
-| Margot  | Data story and geographical analysis  |
-| Thibaut  | Data story and social analysis  |
-| Adrien  | Website building & data visualization  |
+| Gaspard  |   |
+| Thomas  |   |
+| Margot  |   |
+| Thibaut  |   |
+| Adrien  | Datastory, Wordclouds, Fanbase, Microbreweries  |
 
 ## Questions for TAs:
