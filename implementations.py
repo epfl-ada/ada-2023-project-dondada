@@ -10,6 +10,7 @@ import pycountry_convert as pc
 import unicodedata
 import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import CountVectorizer
+import matplotlib.colors as colors
 
 
 
@@ -357,3 +358,8 @@ def get_top_words(df, text_column, custom_stop_words=None, n_top_words=10):
 
     return top_words
 
+def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+    new_cmap = colors.LinearSegmentedColormap.from_list(
+        'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
+        cmap(np.linspace(minval, maxval, n)))
+    return new_cmap
