@@ -2,6 +2,8 @@
 
 import numpy as np
 import pandas as pd
+import seaborn as sns
+import plotly.express as px
 import os 
 import gzip
 import csv
@@ -286,11 +288,10 @@ def aggregate_data(input_data, group_column, user_location):
 
 
 def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_per_year):
-
     unique_groups = data[group_column].unique()
 
     years = [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013,
-            2014, 2015, 2016, 2017]
+             2014, 2015, 2016, 2017]
 
     # Initialize a DataFrame to store normalized ratings
     normalized_ratings_df = pd.DataFrame(index=years, columns=unique_groups)
@@ -314,14 +315,16 @@ def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_pe
         # Assign the normalized ratings to the DataFrame
         normalized_ratings_df[group_value] = nbr_ratings
 
-    # Plotting the data as a stacked bar plot using pandas
-    plt.figure(figsize=(12, 8))
-    normalized_ratings_df.plot(kind='bar', stacked=True, colormap='tab20', edgecolor='w')
-    plt.title(title)
-    plt.xlabel('Year')
-    plt.ylabel('Normalized Number of Ratings')
-    plt.legend(title=group_column, loc='upper left', bbox_to_anchor=(1, 1))
-    plt.show()
+    # Create a long-format DataFrame for Plotly Express
+    normalized_ratings_long = normalized_ratings_df.reset_index().melt(id_vars='index', var_name=group_column, value_name='Normalized Ratings')
+
+    # Plotting the data as a stacked bar plot using Plotly Express
+    fig = px.bar(normalized_ratings_long, x='index', y='Normalized Ratings', color=group_column, barmode='stack',
+                 labels={'index': 'Year', 'Normalized Ratings': 'Normalized Number of Ratings'},
+                 title=title)
+
+    fig.update_layout(barmode='stack', legend_title_text=group_column, xaxis_title='Year', yaxis_title='Normalized Number of Ratings')
+    fig.show()
 
 
 def get_top_words(df, text_column, custom_stop_words=None, n_top_words=10):
@@ -363,3 +366,71 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
         'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
         cmap(np.linspace(minval, maxval, n)))
     return new_cmap
+
+
+def add_iso_code3(location):
+    try:
+        country_alpha3 = py.countries.get(name=location).alpha_3
+        return f'{country_alpha3}'
+    except AttributeError:
+        return location
+
+
+def plot_top_styles(grouped_data):
+    # Calculate the sum of ratings for each style
+    style_ratings_sum = grouped_data.groupby("bigger_style")["nbr_ratings"].sum()
+
+    # Select the top 5 styles with the highest number of ratings
+    top_styles = style_ratings_sum.nlargest(5).index
+    top_styles = sorted(top_styles)
+
+    # Create a stylish line plot for the top 5 styles using seaborn
+    plt.figure(figsize=(12, 8))
+
+    # Set a color palette for better distinction between styles
+    palette = sns.color_palette("husl", n_colors=len(top_styles))
+
+    mean_increase_list_per_year = []
+    mean_increase_y1_yf_list = []
+
+    for style, color in zip(top_styles, palette):
+        # Extract information for the current style
+        style_data = grouped_data[grouped_data["bigger_style"] == style]["ratings_info"].iloc[0]
+        years = list(style_data.keys())
+        years_int = [int(year) for year in years]
+        nbr_ratings = [style_data[year]['nbr_ratings'] for year in years]
+
+        # Calculate the mean increase between the first and last year
+        mean_increase_y1_yf = (nbr_ratings[-1] - nbr_ratings[0]) / (len(nbr_ratings))
+        mean_increase_y1_yf_list.append(mean_increase_y1_yf)
+
+        # Calculate the mean increase per year
+        mean_increase_per_year = sum([(nbr_ratings[i] - nbr_ratings[i - 1]) / nbr_ratings[i - 1]
+                             for i in range(1, len(nbr_ratings))]) / (len(nbr_ratings) - 1)
+        mean_increase_list_per_year.append(mean_increase_per_year)
+
+        # Plot the data as a smooth line
+        sns.lineplot(x=years_int, y=nbr_ratings, label=style, color=color, linewidth=2)
+
+    # Customize plot details
+    plt.title('Number of Ratings per Year for Top 5 Styles', fontsize=16)
+    plt.xlabel('Years', fontsize=14)
+    plt.ylabel('Number of Ratings (log scale)', fontsize=14)
+    plt.yscale('log')
+    plt.legend(title='Style', loc='upper left', fontsize=12)
+    plt.xticks(years_int)
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.show()
+
+    # Print mean increase for each style
+    print(f"Mean Increase for each style per year:")
+    for style, increase in zip(top_styles, mean_increase_list_per_year):
+        print(f"Mean Increase for {style}: {increase:.2%}")
+
+    print("\n------------------------------------------------------")
+
+    # Print mean increase for each style between the first year and last year
+    print(f"\nMean Increase for each style between first year and last year:")
+    for style, increase in zip(top_styles, mean_increase_y1_yf_list):
+        print(f"Mean Increase for {style}: {increase:.2%}")
