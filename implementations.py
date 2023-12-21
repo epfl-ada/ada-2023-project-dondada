@@ -341,11 +341,12 @@ def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_pe
 
     # Create a long-format DataFrame for Plotly Express
     normalized_ratings_long = normalized_ratings_df.reset_index().melt(id_vars='index', var_name=group_column, value_name='Normalized Ratings')
+   
     custom_colors = [
-        '#FF8C00', '#995E19', '#DEB887', '#A52A2A', '#FF0000',
+        '#FF8C00', '#995E19', '#DEB887', '#A52A2A', '#E60505',
         '#FFC831', '#F2D6B5', '#060401', '#FFFFFF', '#FD8E8C',
-        '#9F0B02', '#FAFE7D', '#1DFC07'  # Add three more custom colors
-    ]
+        '#9F0B02', '#EDD140', '#423C3C', '#63825A' 
+    ] 
     
     # Plotting the data as a stacked bar plot using Plotly Express with a qualitative colormap
     fig = px.bar(normalized_ratings_long, x='index', y='Normalized Ratings', color=group_column, barmode='stack',
@@ -353,7 +354,7 @@ def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_pe
                  labels={'index': 'Year', 'Normalized Ratings': 'Normalized Number of Ratings'},
                  title=title)
 
-    fig.update_layout(barmode='stack', legend_title_text=group_column, xaxis_title='Year', yaxis_title='Normalized Number of Ratings')
+    fig.update_layout(barmode='stack', legend_title_text='Styles', xaxis_title='Year', yaxis_title='Normalized Number of Ratings')
     fig.show()
 
     return fig
@@ -451,6 +452,7 @@ def plot_increase_ratings(grouped_data):
         # Add a trace for the current style
         fig.add_trace(go.Scatter(x=years_int, y=nbr_ratings, name=style, mode='lines'))
 
+
     # Update layout details
     fig.update_layout(
         title='Number of Ratings per Year for Top 5 Styles',
@@ -470,7 +472,7 @@ def plot_increase_ratings(grouped_data):
     for style, increase in zip(top_styles, mean_increase_list_per_year):
         print(f"Mean Increase for {style}: {increase:.2%}")
 
-    print("\n------------------------------------------------------")
+    print("\n-------------------------------------------------\n")
 
     # Print mean increase for each style between the first year and last year
     print(f"\nMean Increase for each style between first year and last year:")
@@ -635,7 +637,7 @@ def ratings_per_US_states(data, us_states, style_column, style, year_column, loc
     
     # Update layout for animation and dropdown menu
     fig.update_layout(
-        title_text=f'US City Number of Ratings for {style} by State',
+        title_text=f'Number of Ratings for {style} by State',
         showlegend=True,
         geo=dict(
             scope='usa',
