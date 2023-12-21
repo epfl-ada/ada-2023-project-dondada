@@ -105,6 +105,16 @@ def txt_to_csv(path,name):
 
 def rename_country(location) :
 
+    """
+    Rename specific countries
+
+    Parameters:
+    - location: str, the original location name.
+
+    Returns:
+    - str, the renamed country or the original location name if no rule is matched.
+    """
+
     if 'United States' in location:
         return 'United States'
     if 'U.S' in location: 
@@ -159,9 +169,48 @@ def rename_country(location) :
         return 'Azerbaijan'
     else:
         return location
-    
+
+def categorize_bigger_styles(style):
+
+    """
+    Categorize bigger beer styles into top styles categories.
+
+    Parameters:
+    - style: str, the original beer style.
+
+    Returns:
+    - str, the broader category or 'Other styles' if no rule is matched.
+    """
+
+    style = style.lower()
+
+    if any(substring in style for substring in ['american ipa', 'india style lager', 'ipa','belgian ipa', 
+                                                  'black ipa', 'brut ipa', 'english ipa', '(ipa)', 'imperial ipa', 
+                                                  'milkshake ipa', 'new england ipa']):
+            return 'India Pale Ales'
+    elif any(substring in style for substring in ['american amber / red ale', 'amber ale', 'bitter', 'blond ale', 'american blonde ale', 'american pale ale', '(apa)','belgian blonde ale', 'belgian pale ale', 'bière de garde', 'english bitter', 'english pale ale', 'english pale mild ale', 'extra special / strong bitter (esb)', 'grisette', 'irish red ale', 'kölsch', 'saison']):
+            return 'Pale Ales'
+    elif any(substring in style for substring in ['american imperial stout', 'stout', 'milk / sweet stout','imperial stout', 'american stout', 'english stout', 'foreign / export stout', 'irish dry stout', 'oatmeal stout', 'russian imperial stout', 'sweet / milk stout']):
+            return 'Stouts'
+    elif any(substring in style for substring in ['berliner weisse', 'sour red/brown', 'berliner weissbier','brett beer', 'faro', 'flanders oud bruin', 'flanders red ale', 'fruit lambic', 'fruited kettle sour', 'gose', 'gueuze', 'lambic', 'wild ale']):
+            return 'Wild/Sour Beers'
+    elif any(substring in style for substring in ['american barleywine','barley wine', 'abt/quadrupel', 'scotch ale', 'belgian strong ale', 'belgian ale', 'belgian strong dark ale', 'american strong ale', 'belgian dark strong ale', 'belgian pale strong ale', 'english barleywine', 'english strong ale', 'imperial red ale', 'old ale', 'quadrupel (quad)', 'scotch ale / wee heavy', 'tripel', 'wheatwine']):
+            return 'Strong Ales'
+    else:
+            return 'Other styles'
 
 def add_iso_code(location):
+
+    """
+    Add ISO 3166-1 alpha-2 country code to a location.
+
+    Parameters:
+    - location: str, the location name.
+
+    Returns:
+    - str, the ISO 3166-1 alpha-2 country code or the original location name if not found.
+    """
+    
     try:
         country_alpha2 = py.countries.get(name=location).alpha_2
         return f'{country_alpha2}'
@@ -171,13 +220,23 @@ def add_iso_code(location):
 
 def country_to_continent(country_name):
 
-        try:
-                country_alpha2 = pc.country_name_to_country_alpha2(country_name)
-                country_continent_code = pc.country_alpha2_to_continent_code(country_alpha2)
-                country_continent_name = pc.convert_continent_code_to_continent_name(country_continent_code)
-                return country_continent_name
-        except KeyError:
-                return None
+    """
+    Convert a country name to its continent.
+
+    Parameters:
+    - country_name: str, the name of the country.
+
+    Returns:
+    - str, the name of the continent or None if the country is not found.
+    """
+
+    try:
+            country_alpha2 = pc.country_name_to_country_alpha2(country_name)
+            country_continent_code = pc.country_alpha2_to_continent_code(country_alpha2)
+            country_continent_name = pc.convert_continent_code_to_continent_name(country_continent_code)
+            return country_continent_name
+    except KeyError:
+            return None
 
 
 def convert_to_date(series):
@@ -188,7 +247,6 @@ def convert_to_date(series):
     arg : Unix timestamps  
 
     returns : formatted date 
-
     '''
 
     try:
@@ -200,14 +258,12 @@ def convert_to_date(series):
 def categorize_style(style):
 
     '''
-
     Merge different beer styles into larger categories. To do so, the function detects specific substrings that correspond to broader beer styles. 
     Also converts the provided string to lowercase beforehand for case-insensitive matching. 
 
     arg : beer style, as a string 
 
     returns : broader beer style 
-
     '''
 
     style = style.lower()
@@ -304,6 +360,7 @@ def aggregate_data(input_data, group_column, user_location):
 
 
 def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_per_year):
+    
     """
     Plot normalized ratings by group using Plotly Express.
 
@@ -316,6 +373,7 @@ def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_pe
     Returns:
     None
     """
+
     unique_groups = data[group_column].unique()
 
     years = [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013,
@@ -361,6 +419,7 @@ def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_pe
 
 
 def get_top_words(df, text_column, custom_stop_words=None, n_top_words=10):
+    
     """
     Count the occurrences of words in a text column of a DataFrame and return the top N words.
 
@@ -395,6 +454,20 @@ def get_top_words(df, text_column, custom_stop_words=None, n_top_words=10):
     return top_words
 
 def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
+
+    """
+    Truncate a colormap to a specified range.
+
+    Parameters:
+    - cmap: matplotlib colormap, the original colormap.
+    - minval: float, the minimum value of the range.
+    - maxval: float, the maximum value of the range.
+    - n: int, the number of values in the truncated colormap.
+
+    Returns:
+    - matplotlib.colors.LinearSegmentedColormap, the truncated colormap.
+    """
+
     new_cmap = colors.LinearSegmentedColormap.from_list(
         'trunc({n},{a:.2f},{b:.2f})'.format(n=cmap.name, a=minval, b=maxval),
         cmap(np.linspace(minval, maxval, n)))
@@ -402,6 +475,17 @@ def truncate_colormap(cmap, minval=0.0, maxval=1.0, n=100):
 
 
 def add_iso_code3(location):
+
+    """
+    Add ISO 3166-1 alpha-3 country code to a location.
+
+    Parameters:
+    - location: str, the location name.
+
+    Returns:
+    - str, the ISO 3166-1 alpha-3 country code or the original location name if not found.
+    """
+
     try:
         country_alpha3 = py.countries.get(name=location).alpha_3
         return f'{country_alpha3}'
@@ -410,6 +494,17 @@ def add_iso_code3(location):
 
 
 def plot_increase_ratings(grouped_data):
+   
+    """
+    Plot the number of ratings per year for the top 5 beer styles with the highest total ratings.
+
+    Parameters:
+    - grouped_data: pandas DataFrame, grouped data containing information about beer styles and ratings.
+
+    Returns:
+    - go.Figure: Plotly figure object.
+    """
+
     # Calculate the sum of ratings for each style
     style_ratings_sum = grouped_data.groupby("bigger_style")["nbr_ratings"].sum()
 
@@ -479,12 +574,28 @@ def plot_increase_ratings(grouped_data):
     for style, increase in zip(top_styles, mean_increase_y1_yf_list):
         print(f"Mean Increase for {style}: {increase:.2%}")
 
-    # Show the plot
     fig.show()
 
     return fig
 
 def ratings_per_country(data, style, location_column, ratings_info_column, country_rename_function, add_iso_code_function, continent_function):
+    
+    """
+    Extract and process ratings data per country for a specified beer style.
+
+    Parameters:
+    - data: pandas DataFrame, the input data containing information about beer styles and ratings.
+    - style: str, the beer style to analyze.
+    - location_column: str, the column containing location information.
+    - ratings_info_column: str, the column containing ratings information.
+    - country_rename_function: function, a function to rename countries that don't have the right format.
+    - add_iso_code_function: function, a function to add ISO 3166 norm codes to countries.
+    - continent_function: function, a function to determine the continent for each country.
+
+    Returns:
+    - pd.DataFrame, a DataFrame with processed ratings data per country.
+    """
+
     # Only select the data for the specified style
     style_data = data.query(f'bigger_style == "{style}"')
 
@@ -525,6 +636,23 @@ def ratings_per_country(data, style, location_column, ratings_info_column, count
 
 
 def ratings_per_locations(data, style_column, ratings_info_column, country_rename_function, add_iso_code_function, continent_function, style):
+    
+    """
+    Extract and process ratings data per location for a specified beer style.
+
+    Parameters:
+    - data: pandas DataFrame, the input data containing information about beer styles and ratings.
+    - style_column: str, the column containing beer styles.
+    - ratings_info_column: str, the column containing ratings information.
+    - country_rename_function: function, a function to rename countries that don't have the right format.
+    - add_iso_code_function: function, a function to add ISO 3166 norm codes to countries.
+    - continent_function: function, a function to determine the continent for each country.
+    - style: str, the beer style to analyze.
+
+    Returns:
+    - pd.DataFrame, a DataFrame with processed ratings data per location.
+    """
+
     # Only select the data for the specified style
     style_data = data.query(f'{style_column} == "{style}"')
 
@@ -564,6 +692,23 @@ def ratings_per_locations(data, style_column, ratings_info_column, country_renam
 
 
 def ratings_per_US_states(data, us_states, style_column, style, year_column, location_column, nbr_ratings_column):
+    
+    """
+    Create an animated Plotly figure displaying the number of ratings for a specified beer style by US states.
+
+    Parameters:
+    - data: pandas DataFrame, the input data containing information about beer styles, ratings, and locations.
+    - us_states: pandas DataFrame, data containing information about US states.
+    - style_column: str, the column containing beer styles.
+    - style: str, the beer style to analyze.
+    - year_column: str, the column containing the year information.
+    - location_column: str, the column containing location information.
+    - nbr_ratings_column: str, the column containing the number of ratings information.
+
+    Returns:
+    - go.Figure: Plotly figure object.
+    """
+
     fig = go.Figure()
     
     # Extract states data
@@ -698,6 +843,7 @@ def ratings_per_US_states(data, us_states, style_column, style, year_column, loc
 
 
 def review_keyword_percentage(df, key_words):
+
     """
     Calculate the percentage of reviews containing key words for each year.
 
@@ -708,7 +854,6 @@ def review_keyword_percentage(df, key_words):
     Returns:
     - result_df: DataFrame with yearly counts and percentages.
     """
-    # Convert the 'date' column to datetime format
 
     # Initialize a dictionary to store counts for each year
     yearly_counts = {}
