@@ -64,6 +64,3 @@ In order to reduce the complexity of our dataset, we will perform a PCA to extra
 | **Margot** |  - Geographical and chronological analysis <br> - Social Analysis <br> Datastory|
 | **Thibaut**  |   - Geographical and chronological analysis <br> - Social Analysis <br> - Prediction on next trends |
 | **Adrien**  | - Sentiment analysis <br> - Social analysis <br> - Datastory|
-
-
-![image](https://github.com/epfl-ada/ada-2023-project-dondada/assets/145542268/91cc3abc-28ae-4ecc-94a2-a46ce85431ac)
