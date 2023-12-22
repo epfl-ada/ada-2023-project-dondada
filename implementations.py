@@ -404,11 +404,10 @@ def plot_normalized_ratings_by_group(data, group_column, title, total_ratings_pe
     # Create a long-format DataFrame for Plotly Express
     normalized_ratings_long = normalized_ratings_df.reset_index().melt(id_vars='index', var_name=group_column, value_name='Normalized Ratings')
    
-    custom_colors = [
-        '#FF8C00', '#995E19', '#DEB887', '#A52A2A', '#E60505',
-        '#FFC831', '#F2D6B5', '#060401', '#FFFFFF', '#FD8E8C',
-        '#9F0B02', '#EDD140', '#423C3C', '#63825A' 
-    ] 
+    custom_colors = ['#6688d9', '#b66353', '#00CC96', '#FF6EC7', 
+                     '#FFA15A', '#888888', '#FF6692', '#B6E880', 
+                     '#FF97FF', '#FECB52', '#636EFA', '#EF553B', 
+                     '#9edae5', '#AB63FA']
     
     # Plotting the data as a stacked bar plot using Plotly Express with a qualitative colormap
     fig = px.bar(normalized_ratings_long, x='index', y='Normalized Ratings', color=group_column, barmode='stack',
