@@ -884,3 +884,101 @@ def review_keyword_percentage(df, key_words):
     result_df = pd.DataFrame.from_dict(yearly_counts, orient='index')
 
     return result_df
+
+def aggregate_data2(input_data, group_column):
+
+    '''
+    Creates a new dataframe by aggregating data based on the specified group_column.
+
+    Args:
+    - input_data: DataFrame containing the input data.
+    - group_column: Column based on which the data will be grouped and aggregated.
+
+    Returns:
+    - grouped_data: DataFrame with aggregated data.
+
+    '''
+     
+    # Create an empty dictionary to store aggregated values
+    aggregated_data = {}
+
+    # Iterate over unique values in the specified column
+    for group_value in input_data[group_column].unique():
+        # Filter rows for the current group_value
+        group_data = input_data[input_data[group_column] == group_value]
+        group_data = group_data.sort_values(by='date', ascending=True)
+
+        # Initialize a dictionary for dates
+        aggregated_data[group_value] = {
+            'beer_id': group_data['beer_id'].iloc[0],
+            'style': group_data['style'].iloc[0],
+            'bigger_style': group_data['bigger_style'].iloc[0],
+            'nbr_ratings': len(group_data),
+            'avg': group_data['avg'].iloc[0],
+            'ratings_info': {}
+        }
+
+        # Iterate over unique dates
+        for date in group_data['date'].unique():
+            date_data = group_data[group_data['date'] == date]
+            aggregated_data[group_value]['ratings_info'][str(date)] = {
+                'nbr_ratings': len(date_data),
+                'avg': date_data['avg'].iloc[0],
+            }
+
+    # Convert the dictionary to a DataFrame
+    grouped_data = pd.DataFrame.from_dict(aggregated_data, orient='index')
+
+    # Sort columns in ascending order
+    grouped_data = grouped_data.reset_index().drop(columns='index')
+
+    return grouped_data
+
+def increase_ratings(grouped_data):
+    """
+    Calculate the mean increase in ratings per year for each beer.
+
+    Args:
+    - grouped_data: DataFrame with aggregated data.
+
+    Returns:
+    - mean_increase_df: DataFrame with beer_id and mean_increase_per_year.
+    """
+
+    # Calculate the sum of ratings for each beer
+    beer_ratings_sum = grouped_data.groupby("beer_id")["nbr_ratings"].sum()
+
+    # Sort beers based on their total ratings
+    beers = beer_ratings_sum.sort_values().index
+
+    mean_increase_data = []
+
+    for beer in beers:
+        # Extract information for the current beer
+        beer_data = grouped_data[grouped_data["beer_id"] == beer]["ratings_info"]
+
+        # Check if there is data for the given beer
+        if not beer_data.empty:
+            beer_data = beer_data.iloc[0]
+            years = list(beer_data.keys())
+            years_int = [int(year) for year in years]
+            nbr_ratings = [beer_data[year]['nbr_ratings'] for year in years]
+
+            # Check if there are more than one year of ratings before calculating mean increase
+            if len(nbr_ratings) > 1:
+                # Calculate the mean increase per year
+                mean_increase_per_year = sum(
+                    [(nbr_ratings[i] - nbr_ratings[i - 1]) / nbr_ratings[i - 1] for i in range(1, len(nbr_ratings))]) / (
+                                               len(nbr_ratings) - 1)
+            else:
+                mean_increase_per_year = 0  # If only one year of ratings, set mean increase to 0
+
+            mean_increase_data.append({
+                'beer_id': beer,
+                'mean_increase_per_year': mean_increase_per_year
+            })
+
+    # Convert the list of dictionaries to a DataFrame
+    mean_increase_df = pd.DataFrame(mean_increase_data)
+
+    return mean_increase_df
