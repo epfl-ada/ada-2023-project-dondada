@@ -34,9 +34,11 @@ We analysed the language of comments with a naïve Bayesian classifier, [CLD2]( 
 
 ### Defining Beer popularity
 
+**Analysis of ratings means:** We sampled a given number of ratings for 6 different beer styles we noticed were important. We then perform an ANOVA test on these data to assess if any mean significantly differed from others. ANOVA results being conclusive, we used tukey's honestly significant difference (HSD) test to see which beer style had significantly different ratings mean and in which direction was the difference.
+
 **Analysis of review's text:** We extracted words from different kind of reviews like positive reviews (grade > 4), negative reviews (grade < 1.5), IPA reviews and Stout reviews. Then we plot these words on a [WordCloud](https://amueller.github.io/word_cloud/) and extract the top 10 words appearing in each review category. With this we are able to identify characteristics of good and bad beers, IPAs and Stouts. Comparing IPAs and Stouts with good beer characteristics gives us an idea of the beer popularity. Note that we only did this for the BeerAdvocate dataset for computational purpose.
 
-  **Chronological evolution of popular  beers** We filtered the dataset in order to keep only highly appreciated beers (grade $>3^{rd}$ quartile). We then studied the share of ratings between each big beer styles for every year since 2000. This allowed us to see that some beers disappeared from the trend as they were not rated anymore, while others appeared. We also extracted the highest increase percentage from these data to identify popular types.
+  **Chronological evolution of popular beers** We filtered the dataset in order to keep only highly appreciated beers (grade $>3^{rd}$ quartile). We then studied the share of ratings between each big beer styles for every year since 2000. This allowed us to see that some beers disappeared from the trend as they were not rated anymore, while others appeared. We also extracted the highest increase percentage from these data to identify popular types.
 
 **Beer Fanbase:** We identified users that were "fan" of each beer styles. We defined a fan as a user who dedicated at least 75% of his ratings to a given style. Once we identified fans, we compared the number of fan for each beer styles and displayed them on a world map to get geographical insights.
 
