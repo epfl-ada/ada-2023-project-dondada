@@ -45,8 +45,9 @@ We analysed the language of comments with a naïve Bayesian classifier, [CLD2]( 
   **Microbrewery revolution and IPAs:** For each year, we counted the percentage of reviews that contained keywords related to the microbrewing universe (e.g. craft, microbrewery, taproom, etc…). We did this for several categories (overall, IPA, Stouts, etc…). We displayed the results on a line plot to see if IPAs was more related to the microbrewery culture than other beers. Then to have a qualitative point of view, we performed a $\chi^2$-test between IPA reviews and overall reviews
   
 
- **Prediction of the next trendy beer**
-In order to reduce the complexity of our dataset, we will perform a PCA to extract features with the most variance and get insights on the characteristics that make beers “trendy”. We could then perform clustering using DBSCAN in order to differentiate trendy beers from others, as DBSCANs allows detection of clusters of different sizes. Then we would segregate the styles of trendy beers. The final goal is to identify the fastest growing style of beer in the recent years among these beers.
+ ### Prediction of the next trend
+We tried to predict what beer style will eventually overtake IPAs in terms of trend. To do this, we clustered single beers (not beer styles) with a DBSCAN algorithm, using as entries variables like the number of rating, the number of reviews or the percentage of reviews related to the microbrewing culture. However, due to computational limitations we were only able to run this algorithm on a small subset of the dataset (~200k entries)
+
 
 ## Timeline
 
@@ -63,6 +64,6 @@ In order to reduce the complexity of our dataset, we will perform a PCA to extra
 | ------------- | ------------- |
 | **Gaspard**  |  - Impact of microbrewery culture on beer trends <br> - Prediction of next trends|
 | **Thomas**  |  - Website development <br> - Datastory <br> - Language processing |
-| **Margot** |  - Geographical and chronological analysis <br> - Social Analysis <br> Datastory|
+| **Margot** |  - Geographical and chronological analysis <br> - Social Analysis <br> - Datastory|
 | **Thibaut**  |   - Geographical and chronological analysis <br> - Social Analysis <br> - Prediction on next trends |
 | **Adrien**  | - Sentiment analysis <br> - Social analysis <br> - Datastory|
